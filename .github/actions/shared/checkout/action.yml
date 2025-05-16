@@ -1,5 +1,5 @@
-name: Checkout
-description: [Composite] Checkout repository with configurable options
+name: Checkout @ Shared
+description: '[Composite] Checkout repository with configurable options'
 
 inputs:
   fetch-depth:
