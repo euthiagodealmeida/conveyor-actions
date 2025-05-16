@@ -60,6 +60,7 @@ runs:
           echo "Using default Maven settings"
         fi
 
+    # TODO Mockado a versão do Temurin
     - name: Build application
       uses: docker://euthiagodealmeida/java-builder:latest
       with:
@@ -67,8 +68,8 @@ runs:
         args: >
           -c "source $SDKMAN_DIR/bin/sdkman-init.sh && 
           echo 'Setting up Java ${{ inputs.java-version }}-${{ inputs.java-distribution }}' &&
-          sdk install java ${{ inputs.java-distribution }} ${{ inputs.java-version }} || true &&
-          sdk use java ${{ inputs.java-distribution }} ${{ inputs.java-version }} &&
+          sdk install java 17.0.15-tem || true &&
+          sdk use java 17.0.15-tem &&
           echo 'JDK setup successfully' &&
           sdk current java &&
           echo 'Setting up Maven ${{ inputs.maven-version }}' &&
