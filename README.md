@@ -30,8 +30,7 @@ Lore Ipsum
 
 ## Roadmap
 
-- New feature 1
-
+- Setup cache actions
 - New feature 2
 
 

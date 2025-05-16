@@ -1,0 +1,31 @@
+name: Checkout
+description: [Composite] Checkout repository with configurable options
+
+inputs:
+  fetch-depth:
+    description: 'Number of commits to fetch (0 for all history)'
+    required: false
+    default: '1'
+  lfs:
+    description: 'Download Git-LFS files'
+    required: false
+    default: 'false'
+  submodules:
+    description: 'Checkout submodules (true, false, or recursive)'
+    required: false
+    default: 'false'
+  token:
+    description: 'Token for authentication (dynamically created during workflow run)'
+    required: false
+    default: ${{ github.token }}
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: ${{ inputs.fetch-depth }}
+        lfs: ${{ inputs.lfs }}
+        submodules: ${{ inputs.submodules }}
+        token: ${{ inputs.token }}
