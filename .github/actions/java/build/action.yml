@@ -66,7 +66,8 @@ runs:
       with:
         entrypoint: /bin/bash
         args: >
-          -c "source $SDKMAN_DIR/bin/sdkman-init.sh && 
+          -c "source $SDKMAN_DIR/bin/sdkman-init.sh &&
+          whoami && pwd &&
           echo 'Setting up Java ${{ inputs.java-version }}-${{ inputs.java-distribution }}' &&
           sdk install java 17.0.15-tem || true &&
           sdk use java 17.0.15-tem &&
