@@ -30,6 +30,10 @@ inputs:
     description: 'Working directory where the build should run'
     required: false
     default: '.'
+  maven-settings-path:
+    description: 'Path to maven settings.xml file in the repository'
+    required: false
+    default: 'maven-settings.xml'
 
 runs:
   using: composite
@@ -46,13 +50,22 @@ runs:
       with:
         maven-version: ${{ inputs.maven-version }}
 
-    # TODO O maven-settings.xml deve vir do repositório da aplicação pois pode existir mirrors privados
     - name: Configure Maven Settings
       shell: bash
       run: |
         echo "MAVEN_OPTS=-Xmx4g" >> $GITHUB_ENV
         mkdir -p ~/.m2
-        echo "<settings><mirrors><mirror><id>central</id><url>https://repo1.maven.org/maven2</url><mirrorOf>central</mirrorOf></mirror></mirrors></settings>" > ~/.m2/settings.xml
+
+    - name: Copy Maven Settings from Repository
+      shell: bash
+      run: |
+        if [ -f "${{ github.workspace }}/${{ inputs.maven-settings-path }}" ]; then
+          cp "${{ github.workspace }}/${{ inputs.maven-settings-path }}" ~/.m2/settings.xml
+          echo "Using custom Maven settings from repository at ${{ inputs.maven-settings-path }}"
+        else
+          echo "<settings><mirrors><mirror><id>central</id><url>https://repo1.maven.org/maven2</url><mirrorOf>central</mirrorOf></mirror></mirrors></settings>" > ~/.m2/settings.xml
+          echo "Using default Maven settings"
+        fi
 
     - name: Build with Maven
       shell: bash
