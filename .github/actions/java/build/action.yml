@@ -67,7 +67,7 @@ runs:
         args: >
           -c "source $SDKMAN_DIR/bin/sdkman-init.sh && 
           echo 'Setting up Java ${{ inputs.java-version }}-${{ inputs.java-distribution }}' &&
-          sdk install java ${{ inputs.java-version }}-${{ inputs.java-distribution }} || true &&
+          sdk install java ${{ inputs.java-distribution }} ${{ inputs.java-version }} || true &&
           sdk use java ${{ inputs.java-version }}-${{ inputs.java-distribution }} &&
           echo 'JDK setup successfully' &&
           sdk current java &&
