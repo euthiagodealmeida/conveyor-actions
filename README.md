@@ -3,8 +3,8 @@
 
 A Github Actions version of Conveyor Engine
 
-![MIT License](https://img.shields.io/badge/License-MIT-green.svg)
-![mantained-yes](https://img.shields.io/badge/mantained-yes-green.svg) 
+![version](https://img.shields.io/badge/version-0.0.0-orange.svg)
+![mantained](https://img.shields.io/badge/mantained-yes-green.svg) 
 
 
 
@@ -31,6 +31,6 @@ Lore Ipsum
 
 
 ## Author
-- [LinkedIn](www.linkedin.com/in/euthiagodealmeida)
+- [@LinkedIn](www.linkedin.com/in/euthiagodealmeida)
 - [@euthiagodealmeida](https://www.github.com/euthiagodealmeida)
 
