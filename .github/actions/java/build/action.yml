@@ -64,9 +64,8 @@ runs:
     - name: Build application
       uses: docker://euthiagodealmeida/java-builder:latest
       with:
-        entrypoint: /bin/bash
         args: >
-          -c "source $SDKMAN_DIR/bin/sdkman-init.sh &&
+          bash -c "source $SDKMAN_DIR/bin/sdkman-init.sh &&
           whoami && pwd &&
           ls -lah && ls -lah ../.. && ls -lah ../ &&
           echo 'Setting up Java ${{ inputs.java-version }}-${{ inputs.java-distribution }}' &&
