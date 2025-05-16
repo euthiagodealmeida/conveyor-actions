@@ -1,5 +1,5 @@
 name: Java @ Build
-description: '[Composite] Build a Java project without testing or artifact management'
+description: '[Composite] Build a Java project using a pre-configured Docker container with SDKman'
 
 inputs:
   java-version:
@@ -36,29 +36,22 @@ inputs:
     default: 'maven-settings.xml'
 
 runs:
-  using: composite
+  using: 'composite'
   steps:
-    - name: Set up JDK ${{ inputs.java-version }}
-      uses: actions/setup-java@v3
+    - name: Setup Maven Cache
+      uses: actions/cache@v3
+      if: inputs.cache-enabled == 'true'
       with:
-        java-version: ${{ inputs.java-version }}
-        distribution: ${{ inputs.java-distribution }}
-        cache: ${{ inputs.cache-enabled == 'true' && 'maven' || '' }}
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ inputs.java-version }}-${{ inputs.maven-version }}-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-${{ inputs.java-version }}-${{ inputs.maven-version }}-
+          ${{ runner.os }}-maven-
 
-    - name: Set up Maven
-      uses: stCarolas/setup-maven@v4.5
-      with:
-        maven-version: ${{ inputs.maven-version }}
-
-    - name: Configure Maven Settings
+    - name: Setup Maven Settings
       shell: bash
       run: |
-        echo "MAVEN_OPTS=-Xmx4g" >> $GITHUB_ENV
         mkdir -p ~/.m2
-
-    - name: Copy Maven Settings from Repository
-      shell: bash
-      run: |
         if [ -f "${{ github.workspace }}/${{ inputs.maven-settings-path }}" ]; then
           cp "${{ github.workspace }}/${{ inputs.maven-settings-path }}" ~/.m2/settings.xml
           echo "Using custom Maven settings from repository at ${{ inputs.maven-settings-path }}"
@@ -67,8 +60,23 @@ runs:
           echo "Using default Maven settings"
         fi
 
-    - name: Build with Maven
-      shell: bash
-      working-directory: ${{ inputs.working-directory }}
-      run: |
-        ${{ inputs.build-command }} ${{ inputs.arguments }}
+    - name: Build application
+      uses: docker://euthiagodealmeida/java-builder:latest
+      with:
+        entrypoint: /bin/bash
+        args: >
+          -c "source $SDKMAN_DIR/bin/sdkman-init.sh && 
+          echo 'Setting up Java ${{ inputs.java-version }}-${{ inputs.java-distribution }}' &&
+          sdk install java ${{ inputs.java-version }}-${{ inputs.java-distribution }} || true &&
+          sdk use java ${{ inputs.java-version }}-${{ inputs.java-distribution }} &&
+          echo 'JDK setup successfully' &&
+          sdk current java &&
+          echo 'Setting up Maven ${{ inputs.maven-version }}' &&
+          sdk install maven ${{ inputs.maven-version }} || true &&
+          sdk use maven ${{ inputs.maven-version }} &&
+          echo 'Maven setup successfully' &&
+          sdk current maven &&
+          export MAVEN_OPTS='-Xmx4g' &&
+          cd $GITHUB_WORKSPACE/${{ inputs.working-directory }} &&
+          echo 'Executing: ${{ inputs.build-command }} ${{ inputs.arguments }}' &&
+          ${{ inputs.build-command }} ${{ inputs.arguments }}"
