@@ -1,5 +1,5 @@
 name: Java @ Build
-description: '[Composite] Build a Java project using a pre-configured Docker container with SDKman'
+description: '[Composite] Build a Java project using GitHub Actions'
 
 inputs:
   java-version:
@@ -38,15 +38,18 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Setup Maven Cache
-      uses: actions/cache@v3
-      if: inputs.cache-enabled == 'true'
+    - name: Set up JDK ${{ inputs.java-version }} (${{ inputs.java-distribution }})
+      uses: actions/setup-java@v3
       with:
-        path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ inputs.java-version }}-${{ inputs.maven-version }}-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          ${{ runner.os }}-maven-${{ inputs.java-version }}-${{ inputs.maven-version }}-
-          ${{ runner.os }}-maven-
+        distribution: ${{ inputs.java-distribution }}
+        java-version: ${{ inputs.java-version }}
+        cache: 'maven'
+        cache-dependency-path: '**/pom.xml'
+
+    - name: Set up Maven ${{ inputs.maven-version }}
+      uses: stCarolas/setup-maven@v4.5
+      with:
+        maven-version: ${{ inputs.maven-version }}
 
     - name: Setup Maven Settings
       shell: bash
@@ -60,24 +63,15 @@ runs:
           echo "Using default Maven settings"
         fi
 
-    # TODO Mockado a versão do Temurin
-    - name: Build application
-      uses: docker://euthiagodealmeida/java-builder:latest
-      with:
-        args: >
-          bash -c "whoami && pwd &&
-          ls -lah &&
-          echo 'Setting up Java ${{ inputs.java-version }}-${{ inputs.java-distribution }}' &&
-          sdk install java 17.0.15-tem || true &&
-          sdk use java 17.0.15-tem &&
-          echo 'JDK setup successfully' &&
-          sdk current java &&
-          echo 'Setting up Maven ${{ inputs.maven-version }}' &&
-          sdk install maven ${{ inputs.maven-version }} || true &&
-          sdk use maven ${{ inputs.maven-version }} &&
-          echo 'Maven setup successfully' &&
-          sdk current maven &&
-          export MAVEN_OPTS='-Xmx4g' &&
-          cd $GITHUB_WORKSPACE/${{ inputs.working-directory }} &&
-          echo 'Executing: ${{ inputs.build-command }} ${{ inputs.arguments }}' &&
-          ${{ inputs.build-command }} ${{ inputs.arguments }}"
+    - name: Build with Maven
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        echo "Java version:"
+        java -version
+        echo "Maven version:"
+        mvn --version
+        
+        export MAVEN_OPTS='-Xmx4g'
+        echo "Executing: ${{ inputs.build-command }} ${{ inputs.arguments }}"
+        ${{ inputs.build-command }} ${{ inputs.arguments }}
