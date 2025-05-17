@@ -102,7 +102,7 @@ runs:
 
     - name: Upload Coverage Reports
       if: ${{ inputs.coverage-enabled == 'true' }}
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: coverage-report
         path: ${{ inputs.working-directory }}/${{ inputs.coverage-report-path }}
