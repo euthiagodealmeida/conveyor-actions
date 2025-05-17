@@ -1,0 +1,108 @@
+name: Java @ Test
+description: '[Composite] Run tests for a Java project'
+
+inputs:
+  java-version:
+    description: 'Java version to use'
+    required: false
+    default: '17'
+  java-distribution:
+    description: 'Java distribution to use'
+    required: false
+    default: 'temurin'
+  test-command:
+    description: 'Test command to execute'
+    required: false
+    default: 'mvn -B test'
+  integration-test-command:
+    description: 'Integration test command to execute'
+    required: false
+    default: 'mvn -B verify -DskipUnitTests'
+  custom-test-arguments:
+    description: 'Additional arguments for the test command'
+    required: false
+    default: ''
+  skip-integration-tests:
+    description: 'Whether to skip integration tests'
+    required: false
+    default: 'false'
+  coverage-enabled:
+    description: 'Whether to collect code coverage metrics'
+    required: false
+    default: 'true'
+  working-directory:
+    description: 'Working directory where tests should run'
+    required: false
+    default: '.'
+  test-results-path:
+    description: 'Path where test results are stored'
+    required: false
+    default: 'target/surefire-reports'
+  coverage-report-path:
+    description: 'Path where coverage reports are stored'
+    required: false
+    default: 'target/site/jacoco'
+  maven-settings-path:
+    description: 'Path to maven settings.xml file in the repository'
+    required: false
+    default: 'maven-settings.xml'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up JDK ${{ inputs.java-version }} (${{ inputs.java-distribution }})
+      uses: actions/setup-java@v3
+      with:
+        distribution: ${{ inputs.java-distribution }}
+        java-version: ${{ inputs.java-version }}
+        cache: 'maven'
+
+    - name: Setup Maven Settings
+      shell: bash
+      run: |
+        mkdir -p ~/.m2
+        if [ -f "${{ github.workspace }}/${{ inputs.maven-settings-path }}" ]; then
+          cp "${{ github.workspace }}/${{ inputs.maven-settings-path }}" ~/.m2/settings.xml
+          echo "Using custom Maven settings from repository"
+        else
+          echo "<settings><mirrors><mirror><id>central</id><url>https://repo1.maven.org/maven2</url><mirrorOf>central</mirrorOf></mirror></mirrors></settings>" > ~/.m2/settings.xml
+          echo "Using default Maven settings"
+        fi
+
+    - name: Run Unit Tests
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        echo "JAVA VERSION:"
+        java -version
+        echo "MAVEN VERSION:"
+        mvn --version
+        
+        echo "Running unit tests..."
+        export MAVEN_OPTS='-Xmx2g'
+        test_command="${{ inputs.test-command }}"
+
+        if [ "${{ inputs.coverage-enabled }}" == "true" ]; then
+          echo "Running tests with coverage"
+          test_command="$test_command -Pcoverage"
+        fi
+
+        echo "Executing: $test_command ${{ inputs.custom-test-arguments }}"
+        $test_command ${{ inputs.custom-test-arguments }}
+
+    - name: Run Integration Tests
+      if: ${{ inputs.skip-integration-tests != 'true' }}
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        echo "Running integration tests..."
+        export MAVEN_OPTS='-Xmx2g'
+        echo "Executing: ${{ inputs.integration-test-command }} ${{ inputs.custom-test-arguments }}"
+        ${{ inputs.integration-test-command }} ${{ inputs.custom-test-arguments }}
+
+    - name: Upload Coverage Reports
+      if: ${{ inputs.coverage-enabled == 'true' }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-report
+        path: ${{ inputs.working-directory }}/${{ inputs.coverage-report-path }}
