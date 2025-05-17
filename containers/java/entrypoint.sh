@@ -1,7 +1,10 @@
 #!/bin/sh
 
-# Making sdkman available for root user
-echo "source /root/.sdkman/bin/sdkman-init.sh" >> /root/.bashrc
+# This makes sdk available to any commands that are executed
+if [ -f "/root/.sdkman/bin/sdkman-init.sh" ]; then
+  . /root/.sdkman/bin/sdkman-init.sh
+  echo "SDKMAN sourced successfully"
+fi
 
 # Print arguments received
 printf 'Received %d args:' "$#"
