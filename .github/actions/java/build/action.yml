@@ -65,7 +65,7 @@ runs:
       uses: docker://euthiagodealmeida/java-builder:latest
       with:
         args: >
-          sh -c "whoami && pwd &&
+          bash -c "whoami && pwd &&
           ls -lah &&
           echo 'Setting up Java ${{ inputs.java-version }}-${{ inputs.java-distribution }}' &&
           sdk install java 17.0.15-tem || true &&
