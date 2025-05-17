@@ -124,10 +124,11 @@ jobs:
           maven-settings-path: ${{ inputs.maven-settings-path }}
 
       - name: Cache Target Directory
-        uses: actions/cache/save@v3
+        uses: euthiagodealmeida/conveyor-actions/.github/actions/shared/cache@develop
         with:
+          operation: 'save'
           path: ${{ inputs.working-directory }}/target
-          key: ${{ steps.cache-key.outputs.key }}
+          cache-key: ${{ steps.cache-key.outputs.key }}
 
   test:
     name: Test Java Project
@@ -143,11 +144,12 @@ jobs:
           submodules: ${{ inputs.submodules }}
 
       - name: Restore Target Directory
-        uses: actions/cache/restore@v3
+        uses: euthiagodealmeida/conveyor-actions/.github/actions/shared/cache@develop
         with:
+          operation: 'restore'
           path: ${{ inputs.working-directory }}/target
-          key: ${{ needs.build.outputs.build-cache-key }}
-          fail-on-cache-miss: true
+          cache-key: ${{ needs.build.outputs.build-cache-key }}
+          fail-on-miss: 'true'
 
       - name: Test Project
         uses: euthiagodealmeida/conveyor-actions/.github/actions/java/test@develop

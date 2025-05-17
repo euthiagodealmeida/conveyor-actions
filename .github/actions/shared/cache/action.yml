@@ -1,0 +1,35 @@
+name: Cache @ Shared
+description: '[Composite] Manage caching of build artifacts'
+
+inputs:
+  operation:
+    description: 'Cache operation (save or restore)'
+    required: true
+  cache-key:
+    description: 'Cache key to use for saving or restoring'
+    required: true
+  path:
+    description: 'Path to cache'
+    required: true
+  fail-on-miss:
+    description: 'Whether to fail if cache is not found'
+    required: false
+    default: 'false'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Save Cache
+      if: inputs.operation == 'save'
+      uses: actions/cache/save@v3
+      with:
+        path: ${{ inputs.path }}
+        key: ${{ inputs.cache-key }}
+
+    - name: Restore Cache
+      if: inputs.operation == 'restore'
+      uses: actions/cache/restore@v3
+      with:
+        path: ${{ inputs.path }}
+        key: ${{ inputs.cache-key }}
+        fail-on-cache-miss: ${{ inputs.fail-on-miss == 'true' }}
