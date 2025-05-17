@@ -76,5 +76,5 @@ jobs:
           build-command: ${{ inputs.build-command }}
           arguments: ${{ inputs.custom-build-arguments }}
           cache-enabled: ${{ inputs.cache-enabled }}
-          working-directory: repo/${{ inputs.working-directory }}
-          maven-settings-path: repo/${{ inputs.maven-settings-path }}
+          working-directory: ${{ inputs.working-directory }}
+          maven-settings-path: ${{ inputs.maven-settings-path }}
