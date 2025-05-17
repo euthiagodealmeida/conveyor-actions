@@ -1,0 +1,80 @@
+name: Java CI Workflow
+
+on:
+  workflow_call:
+    inputs:
+      fetch-depth:
+        description: 'Number of commits to fetch'
+        default: '1'
+        required: false
+        type: string
+      lfs:
+        description: 'Download Git-LFS files'
+        default: 'false'
+        required: false
+        type: string
+      submodules:
+        description: 'Checkout submodules'
+        default: 'false'
+        required: false
+        type: string
+      java-version:
+        description: 'Java version'
+        default: '17'
+        required: false
+        type: string
+      java-distribution:
+        description: 'Java distribution'
+        default: 'temurin'
+        required: false
+        type: string
+      build-command:
+        description: 'Build command'
+        default: 'mvn -B clean verify'
+        required: false
+        type: string
+      custom-build-arguments:
+        description: 'Additional arguments for the build command'
+        required: false
+        default: ''
+        type: string
+      cache-enabled:
+        description: 'Whether to use Maven dependency caching'
+        default: 'true'
+        required: false
+        type: string
+      working-directory:
+        description: 'Working directory where the build should run'
+        default: '.'
+        required: false
+        type: string
+      maven-settings-path:
+        description: 'Path to maven settings.xml file'
+        default: 'maven-settings.xml'
+        required: false
+        type: string
+
+
+jobs:
+  build:
+    name: Build Java Project
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: ./.github/actions/shared/checkout
+        with:
+          fetch-depth: ${{ inputs.fetch-depth }}
+          lfs: ${{ inputs.lfs }}
+          submodules: ${{ inputs.submodules }}
+
+      - name: Build Project
+        uses: ./.github/conveyor-actions/.github/actions/java/build
+        with:
+          java-version: ${{ inputs.java-version }}
+          java-distribution: ${{ inputs.java-distribution }}
+          build-command: ${{ inputs.build-command }}
+          arguments: ${{ inputs.custom-build-arguments }}
+          cache-enabled: ${{ inputs.cache-enabled }}
+          working-directory: repo/${{ inputs.working-directory }}
+          maven-settings-path: repo/${{ inputs.maven-settings-path }}
