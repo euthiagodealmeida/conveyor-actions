@@ -1,8 +1,8 @@
-#!/bin/bash
+#!/bin/sh
 
-if [ -d "/github/workspace" ]; then
-  sudo chown -R conveyorci:conveyorci /github/workspace
-  echo "Fixed permissions for /github/workspace"
-fi
+# Print arguments received
+printf 'Received %d args:' "$#"
+printf " '%s'" "$@"
+printf '\n'
 
 exec "$@"
