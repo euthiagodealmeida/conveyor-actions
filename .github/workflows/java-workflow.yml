@@ -40,7 +40,7 @@ on:
         type: string
       cache-enabled:
         description: 'Whether to use Maven dependency caching'
-        default: 'true'
+        default: 'false'
         required: false
         type: string
       working-directory:

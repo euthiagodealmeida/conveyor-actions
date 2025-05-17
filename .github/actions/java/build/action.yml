@@ -21,7 +21,7 @@ inputs:
   cache-enabled:
     description: 'Whether to use Maven dependency caching'
     required: false
-    default: 'true'
+    default: 'false'
   working-directory:
     description: 'Working directory where the build should run'
     required: false
