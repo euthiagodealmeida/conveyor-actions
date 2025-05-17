@@ -95,6 +95,9 @@ jobs:
     name: Build Java Project
     runs-on: ubuntu-latest
 
+    outputs:
+      build-cache-key: ${{ steps.cache-key.outputs.key }}
+
     steps:
       - name: Checkout Repository
         uses: euthiagodealmeida/conveyor-actions/.github/actions/shared/checkout@develop
@@ -102,6 +105,12 @@ jobs:
           fetch-depth: ${{ inputs.fetch-depth }}
           lfs: ${{ inputs.lfs }}
           submodules: ${{ inputs.submodules }}
+
+      - name: Generate Cache Key
+        id: cache-key
+        shell: bash
+        run: |
+          echo "key=build-${{ github.sha }}-${{ github.run_id }}" >> $GITHUB_OUTPUT
 
       - name: Build Project
         uses: euthiagodealmeida/conveyor-actions/.github/actions/java/build@develop
@@ -113,6 +122,12 @@ jobs:
           cache-enabled: ${{ inputs.cache-enabled }}
           working-directory: ${{ inputs.working-directory }}
           maven-settings-path: ${{ inputs.maven-settings-path }}
+
+      - name: Cache Target Directory
+        uses: actions/cache/save@v3
+        with:
+          path: ${{ inputs.working-directory }}/target
+          key: ${{ steps.cache-key.outputs.key }}
 
   test:
     name: Test Java Project
@@ -126,6 +141,13 @@ jobs:
           fetch-depth: ${{ inputs.fetch-depth }}
           lfs: ${{ inputs.lfs }}
           submodules: ${{ inputs.submodules }}
+
+      - name: Restore Target Directory
+        uses: actions/cache/restore@v3
+        with:
+          path: ${{ inputs.working-directory }}/target
+          key: ${{ needs.build.outputs.build-cache-key }}
+          fail-on-cache-miss: true
 
       - name: Test Project
         uses: euthiagodealmeida/conveyor-actions/.github/actions/java/test@develop
