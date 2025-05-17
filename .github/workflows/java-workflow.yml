@@ -74,7 +74,7 @@ jobs:
           java-version: ${{ inputs.java-version }}
           java-distribution: ${{ inputs.java-distribution }}
           build-command: ${{ inputs.build-command }}
-          arguments: ${{ inputs.custom-build-arguments }}
+          custom-build-arguments: ${{ inputs.custom-build-arguments }}
           cache-enabled: ${{ inputs.cache-enabled }}
           working-directory: ${{ inputs.working-directory }}
           maven-settings-path: ${{ inputs.maven-settings-path }}
