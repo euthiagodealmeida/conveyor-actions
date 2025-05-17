@@ -44,12 +44,11 @@ runs:
         distribution: ${{ inputs.java-distribution }}
         java-version: ${{ inputs.java-version }}
         cache: 'maven'
-        cache-dependency-path: '**/pom.xml'
 
-    - name: Set up Maven ${{ inputs.maven-version }}
-      uses: stCarolas/setup-maven@v4.5
-      with:
-        maven-version: ${{ inputs.maven-version }}
+#    - name: Set up Maven ${{ inputs.maven-version }}
+#      uses: stCarolas/setup-maven@v4.5
+#      with:
+#        maven-version: ${{ inputs.maven-version }}
 
     - name: Setup Maven Settings
       shell: bash
