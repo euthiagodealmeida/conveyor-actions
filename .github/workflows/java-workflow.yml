@@ -62,14 +62,14 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: ./.github/actions/shared/checkout
+        uses: euthiagodealmeida/conveyor-actions/.github/actions/shared/checkout@develop
         with:
           fetch-depth: ${{ inputs.fetch-depth }}
           lfs: ${{ inputs.lfs }}
           submodules: ${{ inputs.submodules }}
 
       - name: Build Project
-        uses: ./.github/conveyor-actions/.github/actions/java/build
+        uses: euthiagodealmeida/conveyor-actions/.github/actions/java/build@develop
         with:
           java-version: ${{ inputs.java-version }}
           java-distribution: ${{ inputs.java-distribution }}
