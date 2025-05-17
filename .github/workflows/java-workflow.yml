@@ -1,5 +1,9 @@
 name: Java CI Workflow
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   workflow_call:
     inputs:
@@ -94,6 +98,7 @@ jobs:
   build:
     name: Build Java Project
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     outputs:
       build-cache-key: ${{ steps.cache-key.outputs.key }}
@@ -112,7 +117,22 @@ jobs:
         run: |
           echo "key=build-${{ github.sha }}-${{ github.run_id }}" >> $GITHUB_OUTPUT
 
-      - name: Build Project
+      - name: Build Project (First Attempt)
+        id: build
+        uses: euthiagodealmeida/conveyor-actions/.github/actions/java/build@develop
+        continue-on-error: true
+        with:
+          java-version: ${{ inputs.java-version }}
+          java-distribution: ${{ inputs.java-distribution }}
+          build-command: ${{ inputs.build-command }}
+          custom-build-arguments: ${{ inputs.custom-build-arguments }}
+          cache-enabled: ${{ inputs.cache-enabled }}
+          working-directory: ${{ inputs.working-directory }}
+          maven-settings-path: ${{ inputs.maven-settings-path }}
+
+      - name: Build Project (Retry, if needed)
+        id: retry-build
+        if: steps.build.outcome == 'failure'
         uses: euthiagodealmeida/conveyor-actions/.github/actions/java/build@develop
         with:
           java-version: ${{ inputs.java-version }}
