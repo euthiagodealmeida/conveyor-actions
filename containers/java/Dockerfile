@@ -27,10 +27,14 @@ RUN useradd -ms /bin/bash conveyorci && \
 # SDKMAN
 RUN curl -s "https://get.sdkman.io" | bash
 SHELL ["/bin/bash", "-c"]
+
 # Configure SDKMAN
 RUN echo "sdkman_auto_answer=true" > /root/.sdkman/etc/config && \
     echo "sdkman_auto_selfupdate=false" >> /root/.sdkman/etc/config && \
     echo "sdkman_insecure_ssl=false" >> /root/.sdkman/etc/config
+
+# Making it available for root user
+RUN echo "source /root/.sdkman/bin/sdkman-init.sh" >> /root/.bashrc
 
 # Export SDKMAN_DIR for use in GitHub Actions
 ENV SDKMAN_DIR="/root/.sdkman"
