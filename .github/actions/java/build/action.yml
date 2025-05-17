@@ -14,7 +14,7 @@ inputs:
     description: 'Custom build command to execute'
     required: false
     default: 'mvn -B clean compile'
-  arguments:
+  custom-build-arguments:
     description: 'Additional arguments for the build command'
     required: false
     default: ''
@@ -63,5 +63,5 @@ runs:
         mvn --version
         
         export MAVEN_OPTS='-Xmx2g'
-        echo "Executing: ${{ inputs.build-command }} ${{ inputs.arguments }}"
-        ${{ inputs.build-command }} ${{ inputs.arguments }}
+        echo "Executing: ${{ inputs.build-command }} ${{ inputs.custom-build-arguments }}"
+        ${{ inputs.build-command }} ${{ inputs.custom-build-arguments }}
