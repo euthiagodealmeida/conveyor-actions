@@ -42,7 +42,7 @@ runs:
       working-directory: ${{ inputs.working-directory }}
       run: |
         echo "Packaging Java application..."
-        ./mvnw clean package -DskipTests ${{ inputs.custom-package-arguments }}
+        ./mvnw clean package -DskipTests -DartifactName=sprintbot-petclinic ${{ inputs.custom-package-arguments }}
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
