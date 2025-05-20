@@ -205,7 +205,23 @@ jobs:
     name: Package Java Project
     runs-on: ubuntu-latest
     needs: build
+
     steps:
+      - name: Checkout Repository
+        uses: euthiagodealmeida/conveyor-actions/.github/actions/shared/checkout@develop
+        with:
+          fetch-depth: ${{ inputs.fetch-depth }}
+          lfs: ${{ inputs.lfs }}
+          submodules: ${{ inputs.submodules }}
+
+      - name: Restore Target Directory
+        uses: euthiagodealmeida/conveyor-actions/.github/actions/shared/cache@develop
+        with:
+          operation: 'restore'
+          path: ${{ inputs.working-directory }}/target
+          cache-key: ${{ needs.build.outputs.build-cache-key }}
+          fail-on-miss: 'true'
+
       - name: Package Project
         uses: euthiagodealmeida/conveyor-actions/.github/actions/java/package@develop
         with:
@@ -213,5 +229,5 @@ jobs:
           java-distribution: ${{ inputs.java-distribution }}
           custom-package-arguments: ${{ inputs.custom-package-arguments }}
           working-directory: ${{ inputs.working-directory }}
-          artifact-path: ${{ inputs.test-results-path }}
+          artifact-path: ${{ inputs.artifact-path }}
           artifact-name: ${{ inputs.artifact-name }}
