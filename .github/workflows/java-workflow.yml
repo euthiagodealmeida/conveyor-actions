@@ -185,3 +185,13 @@ jobs:
           test-results-path: ${{ inputs.test-results-path }}
           coverage-report-path: ${{ inputs.coverage-report-path }}
           maven-settings-path: ${{ inputs.maven-settings-path }}
+
+      - name: Package Project
+        uses: euthiagodealmeida/conveyor-actions/.github/actions/java/package@develop
+        with:
+          java-version: ${{ inputs.java-version }}
+          java-distribution: ${{ inputs.java-distribution }}
+          custom-package-arguments: ${{ inputs.custom-build-arguments }}
+          working-directory: ${{ inputs.working-directory }}
+          artifact-path: ${{ inputs.test-results-path }}
+          artifact-name: 'zebes-artifact'
