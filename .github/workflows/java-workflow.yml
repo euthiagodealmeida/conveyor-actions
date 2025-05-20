@@ -186,6 +186,11 @@ jobs:
           coverage-report-path: ${{ inputs.coverage-report-path }}
           maven-settings-path: ${{ inputs.maven-settings-path }}
 
+  package:
+    name: Package Java Project
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
       - name: Package Project
         uses: euthiagodealmeida/conveyor-actions/.github/actions/java/package@develop
         with:
