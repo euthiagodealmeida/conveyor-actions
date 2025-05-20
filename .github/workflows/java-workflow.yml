@@ -100,11 +100,11 @@ on:
       artifact-path:
         description: 'Path where the packaged artifact should be stored'
         required: false
-        default: 'target'
+        default: 'target/*.jar'
         type: string
       artifact-name:
         description: 'Name of the artifact to be packaged'
-        default: 'spring-petclinic-3.4.2.jar'
+        default: 'artifact.jar'
         required: true
         type: string
 
