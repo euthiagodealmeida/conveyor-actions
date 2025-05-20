@@ -1,0 +1,60 @@
+name: Java @ Package
+description: '[Composite] Packages a Java application for deployment'
+
+inputs:
+  java-version:
+    description: 'Java version to use'
+    required: false
+    default: '17'
+  java-distribution:
+    description: 'Java distribution to use'
+    required: false
+    default: 'temurin'
+  custom-package-arguments:
+    description: 'Additional arguments for the package command'
+    required: false
+    default: ''
+  working-directory:
+    description: 'Working directory where the build should run'
+    required: false
+    default: '.'
+  artifact-path:
+    description: 'Path where the packaged artifact should be stored'
+    required: false
+    default: 'target'
+  artifact-name:
+    description: 'Name of the artifact to be packaged'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up JDK ${{ inputs.java-version }} (${{ inputs.java-distribution }})
+      uses: actions/setup-java@v3
+      with:
+        distribution: ${{ inputs.java-distribution }}
+        java-version: ${{ inputs.java-version }}
+        cache: 'maven'
+
+    - name: Package application
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        echo "Packaging Java application..."
+        ./mvnw clean package -DskipTests ${{ inputs.custom-package-arguments }}
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      working-directory: ${{ inputs.working-directory }}
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ inputs.artifact-path }}
+        retention-days: 1
+
+#    - name: Prepare artifact for next steps
+#      shell: bash
+#      working-directory: ${{ inputs.working-directory }}
+#      run: |
+#        echo "Artifact has been packaged and is available at ${{ inputs.artifact-path }}"
+#        echo "ARTIFACT_PATH=${{ inputs.artifact-path }}" >> $GITHUB_ENV
+#        echo "ARTIFACT_NAME=${{ inputs.artifact-name }}" >> $GITHUB_ENV
