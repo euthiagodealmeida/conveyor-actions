@@ -45,7 +45,6 @@ runs:
 
     - name: Upload artifact
       uses: actions/upload-artifact@v3
-      working-directory: ${{ inputs.working-directory }}
       with:
         name: ${{ inputs.artifact-name }}
         path: ${{ inputs.artifact-path }}
