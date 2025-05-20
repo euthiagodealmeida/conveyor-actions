@@ -104,7 +104,7 @@ on:
         type: string
       artifact-name:
         description: 'Name of the artifact to be packaged'
-        default: 'artifact.jar'
+        default: 'spring-petclinic-3.4.2.jar'
         required: true
         type: string
 
