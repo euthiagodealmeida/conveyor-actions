@@ -42,6 +42,11 @@ on:
         required: false
         default: ''
         type: string
+      custom-package-arguments:
+          description: 'Additional arguments for the package command'
+          required: false
+          default: ''
+          type: string
       test-command:
         description: 'Test command to execute'
         required: false
@@ -91,6 +96,16 @@ on:
         description: 'Path to maven settings.xml file'
         default: 'maven-settings.xml'
         required: false
+        type: string
+      artifact-path:
+        description: 'Path where the packaged artifact should be stored'
+        required: false
+        default: 'target'
+        type: string
+      artifact-name:
+        description: 'Name of the artifact to be packaged'
+        default: 'artifact.jar'
+        required: true
         type: string
 
 
@@ -196,7 +211,7 @@ jobs:
         with:
           java-version: ${{ inputs.java-version }}
           java-distribution: ${{ inputs.java-distribution }}
-          custom-package-arguments: ${{ inputs.custom-build-arguments }}
+          custom-package-arguments: ${{ inputs.custom-package-arguments }}
           working-directory: ${{ inputs.working-directory }}
           artifact-path: ${{ inputs.test-results-path }}
-          artifact-name: 'zebes-artifact'
+          artifact-name: ${{ inputs.artifact-name }}

@@ -24,6 +24,7 @@ inputs:
     default: 'target'
   artifact-name:
     description: 'Name of the artifact to be packaged'
+    default: 'artifact.jar'
     required: true
 
 runs:
@@ -44,7 +45,7 @@ runs:
         ./mvnw clean package -DskipTests ${{ inputs.custom-package-arguments }}
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ inputs.artifact-name }}
         path: ${{ inputs.artifact-path }}
