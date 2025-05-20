@@ -1,0 +1,125 @@
+name: Java @ Publish
+description: '[Composite] Publish a Java artifact to repository'
+
+inputs:
+  java-version:
+    description: 'Java version to use'
+    required: false
+    default: '17'
+  java-distribution:
+    description: 'Java distribution to use'
+    required: false
+    default: 'temurin'
+  repsy-username:
+    description: 'Repsy repository username'
+    required: true
+  repsy-password:
+    description: 'Repsy repository password/token'
+    required: true
+  repsy-repo-name:
+    description: 'Your Repsy repository name'
+    required: true
+  working-directory:
+    description: 'Working directory where the publish should run'
+    required: false
+    default: '.'
+  custom-publish-arguments:
+    description: 'Additional arguments for the publish command'
+    required: false
+    default: ''
+  artifact-name:
+    description: 'Name of the artifact to publish'
+    required: false
+    default: 'java-artifact'
+  artifact-path:
+    description: 'Path to the artifact to publish'
+    required: false
+    default: 'target/*.jar'
+  skip-tests:
+    description: 'Whether to skip tests during publishing'
+    required: false
+    default: 'true'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up JDK ${{ inputs.java-version }} (${{ inputs.java-distribution }})
+      uses: actions/setup-java@v3
+      with:
+        distribution: ${{ inputs.java-distribution }}
+        java-version: ${{ inputs.java-version }}
+        cache: 'maven'
+        server-id: repsy
+        server-username: ${{ inputs.repsy-username }}
+        server-password: ${{ inputs.repsy-password }}
+
+    - name: Setup Maven Settings
+      shell: bash
+      run: |
+        mkdir -p ~/.m2
+        echo "<settings>
+          <servers>
+            <server>
+              <id>repsy</id>
+              <username>${{ inputs.repsy-username }}</username>
+              <password>${{ inputs.repsy-password }}</password>
+            </server>
+          </servers>
+          <mirrors>
+            <mirror>
+              <id>central</id>
+              <url>https://repo1.maven.org/maven2</url>
+              <mirrorOf>central</mirrorOf>
+            </mirror>
+          </mirrors>
+        </settings>" > ~/.m2/settings.xml
+        echo "Using Repsy Maven settings"
+
+    - name: Verify POM Configuration
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        if grep -q "<distributionManagement>" pom.xml; then
+          echo "Distribution management already configured in pom.xml"
+        else
+          echo "Warning: You need to add distributionManagement section to your pom.xml"
+          echo "Sample configuration for Repsy:"
+          echo "<distributionManagement>"
+          echo "  <repository>"
+          echo "    <id>repsy</id>"
+          echo "    <name>Repsy Maven Repository</name>"
+          echo "    <url>https://repo.repsy.io/${{ inputs.repsy-username }}/${{ inputs.repsy-repo-name }}</url>"
+          echo "  </repository>"
+          echo "</distributionManagement>"
+          exit 1
+        fi
+
+    - name: Publish to Repsy Maven Repository
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        REPSY_USERNAME: ${{ inputs.repsy-username }}
+        REPSY_PASSWORD: ${{ inputs.repsy-password }}
+      run: |
+        echo "JAVA VERSION:"
+        java -version
+        echo "MAVEN VERSION:"
+        mvn --version
+
+        echo "Publishing Java artifact to Repsy Maven Repository..."
+        export MAVEN_OPTS='-Xmx2g'
+
+        skip_tests_arg=""
+        if [ "${{ inputs.skip-tests }}" == "true" ]; then
+          skip_tests_arg="-DskipTests"
+        fi
+
+        echo "Executing: mvn deploy $skip_tests_arg ${{ inputs.custom-publish-arguments }}"
+        mvn deploy $skip_tests_arg ${{ inputs.custom-publish-arguments }}
+
+    - name: Upload artifact to GitHub Actions
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ inputs.working-directory }}/${{ inputs.artifact-path }}
+        retention-days: 1
