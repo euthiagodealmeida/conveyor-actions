@@ -82,8 +82,8 @@ runs:
           <servers>
             <server>
               <id>repsy</id>
-              <username>thiagodealmeida</username>
-              <password>Acesso@123</password>
+              <username>${{ inputs.repsy-username }}</username>
+              <password>${{ inputs.repsy-password }}</password>
             </server>
           </servers>
         </settings>
