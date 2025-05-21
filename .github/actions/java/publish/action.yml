@@ -35,10 +35,6 @@ inputs:
     description: 'Path to the artifact to publish'
     required: false
     default: 'target/*.jar'
-  skip-tests:
-    description: 'Whether to skip tests during publishing'
-    required: false
-    default: 'true'
   cache-enabled:
     description: 'Whether to use Maven dependency caching'
     required: false
@@ -56,6 +52,14 @@ runs:
         server-id: repsy
         server-username: ${{ inputs.repsy-username }}
         server-password: ${{ inputs.repsy-password }}
+
+    # create a job to cat pom.xml
+    - name: Display POM File
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        echo "Displaying POM file content..."
+        cat pom.xml
 
     - name: Verify POM Configuration
       shell: bash
@@ -80,21 +84,11 @@ runs:
       shell: bash
       working-directory: ${{ inputs.working-directory }}
       run: |
-        echo "JAVA VERSION:"
-        java -version
-        echo "MAVEN VERSION:"
-        mvn --version
-
         echo "Publishing Java artifact to Repsy Maven Repository..."
         export MAVEN_OPTS='-Xmx2g'
 
-        skip_tests_arg=""
-        if [ "${{ inputs.skip-tests }}" == "true" ]; then
-          skip_tests_arg="-DskipTests"
-        fi
-
-        echo "Executing: mvn deploy $skip_tests_arg ${{ inputs.custom-publish-arguments }}"
-        mvn deploy $skip_tests_arg ${{ inputs.custom-publish-arguments }}
+        echo "Executing: mvn deploy ${{ inputs.custom-publish-arguments }}"
+        mvn deploy  ${{ inputs.custom-publish-arguments }}
 
     - name: Upload artifact to GitHub Actions
       uses: actions/upload-artifact@v4
