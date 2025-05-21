@@ -43,14 +43,12 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Set environment variables
-      shell: bash
-      run: |
-        echo "REPSY_USERNAME=${{ inputs.repsy-username }}" >> $GITHUB_ENV
-        echo "REPSY_PASSWORD=${{ inputs.repsy-password }}" >> $GITHUB_ENV
 
     - name: Set up JDK ${{ inputs.java-version }} (${{ inputs.java-distribution }})
       uses: actions/setup-java@v3
+      env:
+        REPSY_USERNAME: ${{ inputs.repsy-username }}
+        REPSY_PASSWORD: ${{ inputs.repsy-password }}
       with:
         distribution: ${{ inputs.java-distribution }}
         java-version: ${{ inputs.java-version }}
