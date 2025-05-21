@@ -53,14 +53,6 @@ runs:
         server-username: ${{ inputs.repsy-username }}
         server-password: ${{ inputs.repsy-password }}
 
-    # create a job to cat pom.xml
-    - name: Display POM File
-      shell: bash
-      working-directory: ${{ inputs.working-directory }}
-      run: |
-        echo "Displaying POM file content..."
-        cat pom.xml
-
     - name: Verify POM Configuration
       shell: bash
       working-directory: ${{ inputs.working-directory }}
@@ -74,11 +66,23 @@ runs:
           echo "  <repository>"
           echo "    <id>repsy</id>"
           echo "    <name>Repsy Maven Repository</name>"
-          echo "    <url>https://repo.repsy.io/${{ inputs.repsy-username }}/${{ inputs.repsy-repo-name }}</url>"
+          echo "    <url>https://repo.repsy.io/mvn/${{ inputs.repsy-username }}/${{ inputs.repsy-repo-name }}</url>"
           echo "  </repository>"
           echo "</distributionManagement>"
           exit 1
         fi
+
+    - name: Debug Maven settings
+      shell: bash
+      run: |
+        echo "Checking if settings.xml exists:"
+        ls -la ~/.m2/ || echo "No .m2 directory found"
+        if [ -f ~/.m2/settings.xml ]; then
+          echo "settings.xml structure (redacted):"
+          grep -v password ~/.m2/settings.xml
+        else
+          echo "No settings.xml found"
+        fi   
 
     - name: Publish to Repsy Maven Repository
       shell: bash
