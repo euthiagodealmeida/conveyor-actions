@@ -83,7 +83,7 @@ runs:
             <server>
               <id>repsy</id>
               <username>thiagodealmeida</username>
-              <password>${{ inputs.repsy-password }}</password>
+              <password>Acesso@123</password>
             </server>
           </servers>
         </settings>
