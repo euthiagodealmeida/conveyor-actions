@@ -43,6 +43,12 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    - name: Set environment variables
+      shell: bash
+      run: |
+        echo "REPSY_USERNAME=${{ inputs.repsy-username }}" >> $GITHUB_ENV
+        echo "REPSY_PASSWORD=${{ inputs.repsy-password }}" >> $GITHUB_ENV
+
     - name: Set up JDK ${{ inputs.java-version }} (${{ inputs.java-distribution }})
       uses: actions/setup-java@v3
       with:
@@ -50,8 +56,8 @@ runs:
         java-version: ${{ inputs.java-version }}
         cache: ${{ inputs.cache-enabled == 'true' && 'maven' || '' }}
         server-id: repsy
-        server-username: ${{ inputs.repsy-username }}
-        server-password: ${{ inputs.repsy-password }}
+        server-username: REPSY_USERNAME
+        server-password: REPSY_PASSWORD
 
     - name: Verify POM Configuration
       shell: bash
@@ -82,7 +88,7 @@ runs:
           grep -v password ~/.m2/settings.xml
         else
           echo "No settings.xml found"
-        fi   
+        fi
 
     - name: Publish to Repsy Maven Repository
       shell: bash
@@ -92,7 +98,7 @@ runs:
         export MAVEN_OPTS='-Xmx2g'
 
         echo "Executing: mvn deploy ${{ inputs.custom-publish-arguments }}"
-        mvn deploy  ${{ inputs.custom-publish-arguments }}
+        mvn deploy ${{ inputs.custom-publish-arguments }}
 
     - name: Upload artifact to GitHub Actions
       uses: actions/upload-artifact@v4
