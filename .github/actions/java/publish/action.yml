@@ -56,8 +56,8 @@ runs:
         java-version: ${{ inputs.java-version }}
         cache: ${{ inputs.cache-enabled == 'true' && 'maven' || '' }}
         server-id: repsy
-        server-username: REPSY_USERNAME
-        server-password: REPSY_PASSWORD
+        server-username: ${{ env.REPSY_USERNAME }}
+        server-password: ${{ env.REPSY_PASSWORD }}
 
     - name: Verify POM Configuration
       shell: bash
