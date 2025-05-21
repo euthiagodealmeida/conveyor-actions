@@ -46,16 +46,10 @@ runs:
 
     - name: Set up JDK ${{ inputs.java-version }} (${{ inputs.java-distribution }})
       uses: actions/setup-java@v3
-      env:
-        REPSY_USERNAME: ${{ inputs.repsy-username }}
-        REPSY_PASSWORD: ${{ inputs.repsy-password }}
       with:
         distribution: ${{ inputs.java-distribution }}
         java-version: ${{ inputs.java-version }}
         cache: ${{ inputs.cache-enabled == 'true' && 'maven' || '' }}
-        server-id: repsy
-        server-username: ${{ env.REPSY_USERNAME }}
-        server-password: ${{ env.REPSY_PASSWORD }}
 
     - name: Verify POM Configuration
       shell: bash
@@ -75,6 +69,26 @@ runs:
           echo "</distributionManagement>"
           exit 1
         fi
+
+    - name: Configure Maven settings
+      shell: bash
+      run: |
+        mkdir -p ~/.m2
+        cat > ~/.m2/settings.xml << EOF
+        <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+          <servers>
+            <server>
+              <id>repsy</id>
+              <username>${{ inputs.repsy-username }}</username>
+              <password>${{ inputs.repsy-password }}</password>
+            </server>
+          </servers>
+        </settings>
+        EOF
+        
+        echo "Created settings.xml with proper credentials"  
 
     - name: Debug Maven settings
       shell: bash
