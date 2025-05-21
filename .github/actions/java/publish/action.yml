@@ -94,17 +94,17 @@ runs:
 #
 #        echo "Created settings.xml with proper credentials"
 
-    - name: Debug Maven settings
-      shell: bash
-      run: |
-        echo "Checking if settings.xml exists:"
-        ls -la ~/.m2/ || echo "No .m2 directory found"
-        if [ -f ~/.m2/settings.xml ]; then
-          echo "settings.xml structure (redacted):"
-          grep -v password ~/.m2/settings.xml
-        else
-          echo "No settings.xml found"
-        fi
+#    - name: Debug Maven settings
+#      shell: bash
+#      run: |
+#        echo "Checking if settings.xml exists:"
+#        ls -la ~/.m2/ || echo "No .m2 directory found"
+#        if [ -f ~/.m2/settings.xml ]; then
+#          echo "settings.xml structure (redacted):"
+#          grep -v password ~/.m2/settings.xml
+#        else
+#          echo "No settings.xml found"
+#        fi
 
     - name: Publish to Repsy Maven Repository
       shell: bash
@@ -112,12 +112,7 @@ runs:
       env:
         REPSY_USERNAME: ${{ inputs.repsy-username }}
         REPSY_PASSWORD: ${{ inputs.repsy-password }}
-      run: |
-        echo "Publishing Java artifact to Repsy Maven Repository..."
-        export MAVEN_OPTS='-Xmx2g'
-
-        echo "Executing: mvn deploy ${{ inputs.custom-publish-arguments }}"
-        mvn deploy ${{ inputs.custom-publish-arguments }}
+      run: mvn deploy
 
     - name: Upload artifact to GitHub Actions
       uses: actions/upload-artifact@v4
