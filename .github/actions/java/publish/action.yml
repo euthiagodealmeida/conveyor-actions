@@ -44,6 +44,14 @@ runs:
   using: 'composite'
   steps:
 
+    # Createa a step to debug if the secres are set
+    - name: Debug secrets
+      shell: bash
+      run: |
+        echo "Repsy Username: ${{ inputs.repsy-username }}"
+        echo "Repsy Password: ${{ inputs.repsy-password }}"
+        echo "Repsy Repo Name: ${{ inputs.repsy-repo-name }}"
+
     - name: Set up JDK ${{ inputs.java-version }} (${{ inputs.java-distribution }})
       uses: actions/setup-java@v3
       with:
