@@ -72,6 +72,7 @@ runs:
 
     - name: Configure Maven settings
       shell: bash
+      working-directory: ${{ inputs.working-directory }}
       run: |
         mkdir -p ~/.m2
         cat > ~/.m2/settings.xml << EOF
@@ -81,7 +82,7 @@ runs:
           <servers>
             <server>
               <id>repsy</id>
-              <username>${{ inputs.repsy-username }}</username>
+              <username>thiagodealmeida</username>
               <password>${{ inputs.repsy-password }}</password>
             </server>
           </servers>
