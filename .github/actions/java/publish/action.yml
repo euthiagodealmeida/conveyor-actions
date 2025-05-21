@@ -39,6 +39,10 @@ inputs:
     description: 'Whether to skip tests during publishing'
     required: false
     default: 'true'
+  cache-enabled:
+    description: 'Whether to use Maven dependency caching'
+    required: false
+    default: 'true'
 
 runs:
   using: 'composite'
@@ -48,32 +52,10 @@ runs:
       with:
         distribution: ${{ inputs.java-distribution }}
         java-version: ${{ inputs.java-version }}
-        cache: 'maven'
+        cache: ${{ inputs.cache-enabled == 'true' && 'maven' || '' }}
         server-id: repsy
         server-username: ${{ inputs.repsy-username }}
         server-password: ${{ inputs.repsy-password }}
-
-    - name: Setup Maven Settings
-      shell: bash
-      run: |
-        mkdir -p ~/.m2
-        echo "<settings>
-          <servers>
-            <server>
-              <id>repsy</id>
-              <username>${{ inputs.repsy-username }}</username>
-              <password>${{ inputs.repsy-password }}</password>
-            </server>
-          </servers>
-          <mirrors>
-            <mirror>
-              <id>central</id>
-              <url>https://repo1.maven.org/maven2</url>
-              <mirrorOf>central</mirrorOf>
-            </mirror>
-          </mirrors>
-        </settings>" > ~/.m2/settings.xml
-        echo "Using Repsy Maven settings"
 
     - name: Verify POM Configuration
       shell: bash
@@ -97,9 +79,6 @@ runs:
     - name: Publish to Repsy Maven Repository
       shell: bash
       working-directory: ${{ inputs.working-directory }}
-      env:
-        REPSY_USERNAME: ${{ inputs.repsy-username }}
-        REPSY_PASSWORD: ${{ inputs.repsy-password }}
       run: |
         echo "JAVA VERSION:"
         java -version
