@@ -50,6 +50,9 @@ runs:
         distribution: ${{ inputs.java-distribution }}
         java-version: ${{ inputs.java-version }}
         cache: ${{ inputs.cache-enabled == 'true' && 'maven' || '' }}
+        server-id: repsy
+        server-username: REPSY_USERNAME
+        server-password: REPSY_PASSWORD
 
     - name: Verify POM Configuration
       shell: bash
@@ -70,26 +73,26 @@ runs:
           exit 1
         fi
 
-    - name: Configure Maven settings
-      shell: bash
-      working-directory: ${{ inputs.working-directory }}
-      run: |
-        mkdir -p ~/.m2
-        cat > ~/.m2/settings.xml << EOF
-        <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
-          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
-          <servers>
-            <server>
-              <id>repsy</id>
-              <username>${{ inputs.repsy-username }}</username>
-              <password>${{ inputs.repsy-password }}</password>
-            </server>
-          </servers>
-        </settings>
-        EOF
-        
-        echo "Created settings.xml with proper credentials"  
+#    - name: Configure Maven settings
+#      shell: bash
+#      working-directory: ${{ inputs.working-directory }}
+#      run: |
+#        mkdir -p ~/.m2
+#        cat > ~/.m2/settings.xml << EOF
+#        <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+#          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+#          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+#          <servers>
+#            <server>
+#              <id>repsy</id>
+#              <username>${{ inputs.repsy-username }}</username>
+#              <password>${{ inputs.repsy-password }}</password>
+#            </server>
+#          </servers>
+#        </settings>
+#        EOF
+#
+#        echo "Created settings.xml with proper credentials"
 
     - name: Debug Maven settings
       shell: bash
@@ -106,6 +109,9 @@ runs:
     - name: Publish to Repsy Maven Repository
       shell: bash
       working-directory: ${{ inputs.working-directory }}
+      env:
+        REPSY_USERNAME: ${{ inputs.repsy-username }}
+        REPSY_PASSWORD: ${{ inputs.repsy-password }}
       run: |
         echo "Publishing Java artifact to Repsy Maven Repository..."
         export MAVEN_OPTS='-Xmx2g'
