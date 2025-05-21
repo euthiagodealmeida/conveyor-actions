@@ -108,10 +108,9 @@ runs:
 
     - name: Publish to Repsy Maven Repository
       shell: bash
-      working-directory: ${{ inputs.working-directory }}
       env:
-        REPSY_USERNAME: ${{ secrets.REPSY_USERNAME }}
-        REPSY_PASSWORD: ${{ secrets.REPSY_PASSWORD }}
+        REPSY_USERNAME: ${{ inputs.repsy-username }}
+        REPSY_PASSWORD: ${{ inputs.repsy-password }}
       run: mvn deploy
 
     - name: Upload artifact to GitHub Actions
