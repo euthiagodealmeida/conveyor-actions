@@ -221,22 +221,39 @@ jobs:
   publish:
     name: Publish
     needs: package
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
-    uses: euthiagodealmeida/conveyor-actions/.github/workflows/java-publish.yml@develop
-    with:
-      java-version: ${{ inputs.java-version }}
-      java-distribution: ${{ inputs.java-distribution }}
-      repsy-repo-name: ${{ inputs.repsy-repo-name || 'default' }}
-      working-directory: ${{ inputs.working-directory }}
-      custom-publish-arguments: ${{ inputs.custom-publish-arguments }}
-      artifact-name: ${{ inputs.artifact-name }}
-      artifact-path: ${{ inputs.artifact-path }}
-      cache-enabled: ${{ inputs.cache-enabled }}
-    secrets:
-      REPSY_USERNAME: ${{ secrets.REPSY_USERNAME }}
-      REPSY_PASSWORD: ${{ secrets.REPSY_PASSWORD }}
+    steps:
+      - name: Debug Secrets Availability
+        shell: bash
+        run: |
+          echo "Checking secrets availability..."
+          if [ -n "${{ secrets.REPSY_USERNAME }}" ]; then
+            echo "REPSY_USERNAME is set (value masked for security)"
+          else
+            echo "REPSY_USERNAME is NOT set"
+          fi
+          
+          if [ -n "${{ secrets.REPSY_PASSWORD }}" ]; then
+            echo "REPSY_PASSWORD is set (value masked for security)"
+          else
+            echo "REPSY_PASSWORD is NOT set"
+          fi
+
+      - name: Call Publish Workflow
+        uses: euthiagodealmeida/conveyor-actions/.github/workflows/java-publish.yml@develop
+        with:
+          java-version: ${{ inputs.java-version }}
+          java-distribution: ${{ inputs.java-distribution }}
+          repsy-repo-name: ${{ inputs.repsy-repo-name || 'default' }}
+          working-directory: ${{ inputs.working-directory }}
+          custom-publish-arguments: ${{ inputs.custom-publish-arguments }}
+          artifact-name: ${{ inputs.artifact-name }}
+          artifact-path: ${{ inputs.artifact-path }}
+          cache-enabled: ${{ inputs.cache-enabled }}
+
 
 #  publish:
 #    name: Publish
