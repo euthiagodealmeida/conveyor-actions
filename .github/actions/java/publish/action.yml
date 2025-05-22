@@ -44,7 +44,6 @@ runs:
   using: 'composite'
   steps:
 
-    # Createa a step to debug if the secres are set
     - name: Debug secrets
       shell: bash
       run: |

@@ -239,6 +239,13 @@ jobs:
           cache-key: ${{ needs.build.outputs.build-cache-key }}
           fail-on-miss: 'true'
 
+      - name: Debug secrets wf
+        shell: bash
+        run: |
+          echo "Repsy Username: ${{ inputs.repsy-username }}"
+          echo "Repsy Password: ${{ inputs.repsy-password }}"
+          echo "Repsy Repo Name: ${{ inputs.repsy-repo-name }}"    
+
       - name: Publish Artifact
         uses: euthiagodealmeida/conveyor-actions/.github/actions/java/publish@develop
         with:
