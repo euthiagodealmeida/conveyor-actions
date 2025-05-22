@@ -1,0 +1,107 @@
+name: Java Publish Workflow
+
+on:
+  workflow_call:
+    inputs:
+      java-version:
+        description: 'Java version to use'
+        required: false
+        default: '17'
+        type: string
+      java-distribution:
+        description: 'Java distribution to use'
+        required: false
+        default: 'temurin'
+        type: string
+      repsy-repo-name:
+        description: 'Your Repsy repository name'
+        required: true
+        type: string
+      working-directory:
+        description: 'Working directory where the publish should run'
+        required: false
+        default: '.'
+        type: string
+      custom-publish-arguments:
+        description: 'Additional arguments for the publish command'
+        required: false
+        default: ''
+        type: string
+      artifact-name:
+        description: 'Name of the artifact to publish'
+        required: false
+        default: 'java-artifact'
+        type: string
+      artifact-path:
+        description: 'Path to the artifact to publish'
+        required: false
+        default: 'target/*.jar'
+        type: string
+      cache-enabled:
+        description: 'Whether to use Maven dependency caching'
+        required: false
+        default: 'true'
+        type: string
+    secrets:
+      REPSY_USERNAME:
+        required: true
+      REPSY_PASSWORD:
+        required: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Debug secrets
+        shell: bash
+        run: |
+          echo "Repsy Username: ${{ secrets.REPSY_USERNAME }}"
+          echo "Repsy Password: ***"
+          echo "Repsy Repo Name: ${{ inputs.repsy-repo-name }}"
+
+      - name: Set up JDK ${{ inputs.java-version }} (${{ inputs.java-distribution }})
+        uses: actions/setup-java@v3
+        with:
+          distribution: ${{ inputs.java-distribution }}
+          java-version: ${{ inputs.java-version }}
+          cache: ${{ inputs.cache-enabled == 'true' && 'maven' || '' }}
+          server-id: repsy
+          server-username: REPSY_USERNAME
+          server-password: REPSY_PASSWORD
+
+      - name: Verify POM Configuration
+        shell: bash
+        working-directory: ${{ inputs.working-directory }}
+        run: |
+          if grep -q "<distributionManagement>" pom.xml; then
+            echo "Distribution management already configured in pom.xml"
+          else
+            echo "Warning: You need to add distributionManagement section to your pom.xml"
+            echo "Sample configuration for Repsy:"
+            echo "<distributionManagement>"
+            echo "  <repository>"
+            echo "    <id>repsy</id>"
+            echo "    <name>Repsy Maven Repository</name>"
+            echo "    <url>https://repo.repsy.io/mvn/${{ secrets.REPSY_USERNAME }}/${{ inputs.repsy-repo-name }}</url>"
+            echo "  </repository>"
+            echo "</distributionManagement>"
+            exit 1
+          fi
+
+      - name: Publish to Repsy Maven Repository
+        shell: bash
+        working-directory: ${{ inputs.working-directory }}
+        env:
+          REPSY_USERNAME: ${{ secrets.REPSY_USERNAME }}
+          REPSY_PASSWORD: ${{ secrets.REPSY_PASSWORD }}
+        run: mvn deploy ${{ inputs.custom-publish-arguments }}
+
+      - name: Upload artifact to GitHub Actions
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.artifact-name }}
+          path: ${{ inputs.working-directory }}/${{ inputs.artifact-path }}
+          retention-days: 1

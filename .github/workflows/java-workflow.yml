@@ -218,6 +218,23 @@ jobs:
           artifact-path: ${{ inputs.artifact-path }}
           artifact-name: ${{ inputs.artifact-name }}
 
+#  publish:
+#    name: Publish
+#    needs: [ test, package ]
+#    uses: ./.github/workflows/java-publish.yml
+#    with:
+#      java-version: ${{ inputs.java-version }}
+#      java-distribution: ${{ inputs.java-distribution }}
+#      repsy-repo-name: ${{ inputs.repsy-repo-name || 'default' }}
+#      working-directory: ${{ inputs.working-directory }}
+#      custom-publish-arguments: ${{ inputs.custom-publish-arguments }}
+#      artifact-name: ${{ inputs.artifact-name }}
+#      artifact-path: ${{ inputs.artifact-path }}
+#      cache-enabled: ${{ inputs.cache-enabled }}
+#    secrets:
+#      REPSY_USERNAME: ${{ secrets.REPSY_USERNAME }}
+#      REPSY_PASSWORD: ${{ secrets.REPSY_PASSWORD }}
+
   publish:
     name: Publish
     runs-on: ubuntu-latest
