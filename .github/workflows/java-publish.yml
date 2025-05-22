@@ -55,12 +55,28 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Debug secrets
+      - name: Debug credentials
         shell: bash
         run: |
-          echo "Repsy Username: ${{ secrets.REPSY_USERNAME }}"
-          echo "Repsy Password: ***"
+          echo "Repsy Username: ${{ secrets.REPSY_USERNAME != '' && 'is set (not showing value)' || 'NOT SET!' }}"
+          echo "Repsy Password: ${{ secrets.REPSY_PASSWORD != '' && 'is set (masked)' || 'NOT SET!' }}"
           echo "Repsy Repo Name: ${{ inputs.repsy-repo-name }}"
+
+          # Check if credentials are being correctly set as environment variables
+          if [ -n "$REPSY_USERNAME" ]; then
+            echo "REPSY_USERNAME environment variable: is set"
+          else
+            echo "REPSY_USERNAME environment variable: NOT SET!"
+          fi
+
+          if [ -n "$REPSY_PASSWORD" ]; then
+            echo "REPSY_PASSWORD environment variable: is set"
+          else
+            echo "REPSY_PASSWORD environment variable: NOT SET!"
+          fi
+        env:
+          REPSY_USERNAME: ${{ secrets.REPSY_USERNAME }}
+          REPSY_PASSWORD: ${{ secrets.REPSY_PASSWORD }}
 
       - name: Set up JDK ${{ inputs.java-version }} (${{ inputs.java-distribution }})
         uses: actions/setup-java@v3
