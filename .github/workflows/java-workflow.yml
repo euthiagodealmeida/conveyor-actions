@@ -221,7 +221,7 @@ jobs:
 #  publish:
 #    name: Publish
 #    needs: [ test, package ]
-#    uses: ./.github/workflows/java-publish.yml
+#    uses: euthiagodealmeida/conveyor-actions/.github/actions/java/publish/publish.yml@develop
 #    with:
 #      java-version: ${{ inputs.java-version }}
 #      java-distribution: ${{ inputs.java-distribution }}
@@ -261,10 +261,10 @@ jobs:
         run: |
           echo "Repsy Username: ${{ inputs.repsy-username }}"
           echo "Repsy Password: ${{ inputs.repsy-password }}"
-          echo "Repsy Repo Name: ${{ inputs.repsy-repo-name }}"    
+          echo "Repsy Repo Name: ${{ inputs.repsy-repo-name }}"
 
       - name: Publish Artifact
-        uses: euthiagodealmeida/conveyor-actions/.github/actions/java/publish.yml@develop
+        uses: euthiagodealmeida/conveyor-actions/.github/actions/java/publish/publish.yml@develop
         with:
           repsy-username: ${{ secrets.REPSY_USERNAME }}
           repsy-password: ${{ secrets.REPSY_PASSWORD }}
