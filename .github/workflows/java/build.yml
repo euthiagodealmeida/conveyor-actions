@@ -1,0 +1,103 @@
+name: Java Workflow @ Build
+on:
+  workflow_call:
+    inputs:
+      java-version:
+        description: 'Java version to use'
+        type: string
+        required: false
+        default: '17'
+      java-distribution:
+        description: 'Java distribution to use'
+        type: string
+        required: false
+        default: 'temurin'
+      build-command:
+        description: 'Custom build command to execute'
+        type: string
+        required: false
+        default: 'mvn -B clean compile'
+      custom-build-arguments:
+        description: 'Additional arguments for the build command'
+        type: string
+        required: false
+        default: ''
+      cache-enabled:
+        description: 'Whether to use Maven dependency caching'
+        type: string
+        required: false
+        default: 'false'
+      working-directory:
+        description: 'Working directory where the build should run'
+        type: string
+        required: false
+        default: '.'
+      maven-settings-path:
+        description: 'Path to maven settings.xml file in the repository'
+        type: string
+        required: false
+        default: 'maven-settings.xml'
+    secrets:
+      MAVEN_USERNAME:
+        required: false
+      MAVEN_PASSWORD:
+        required: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK ${{ inputs.java-version }} (${{ inputs.java-distribution }})
+        uses: actions/setup-java@v3
+        with:
+          distribution: ${{ inputs.java-distribution }}
+          java-version: ${{ inputs.java-version }}
+          cache: ${{ inputs.cache-enabled == 'true' && 'maven' || '' }}
+
+      - name: Setup Maven Settings
+        shell: bash
+        run: |
+          mkdir -p ~/.m2
+          if [ -f "${{ github.workspace }}/${{ inputs.maven-settings-path }}" ]; then
+            cp "${{ github.workspace }}/${{ inputs.maven-settings-path }}" ~/.m2/settings.xml
+            echo "Using custom Maven settings from repository at ${{ inputs.maven-settings-path }}"
+          else
+            # Create settings.xml with authentication if secrets are provided
+            if [[ -n "${{ secrets.MAVEN_USERNAME }}" && -n "${{ secrets.MAVEN_PASSWORD }}" ]]; then
+              echo "<settings>
+                <servers>
+                  <server>
+                    <id>central</id>
+                    <username>${{ secrets.MAVEN_USERNAME }}</username>
+                    <password>${{ secrets.MAVEN_PASSWORD }}</password>
+                  </server>
+                </servers>
+                <mirrors>
+                  <mirror>
+                    <id>central</id>
+                    <url>https://repo1.maven.org/maven2</url>
+                    <mirrorOf>central</mirrorOf>
+                  </mirror>
+                </mirrors>
+              </settings>" > ~/.m2/settings.xml
+              echo "Using Maven settings with authentication"
+            else
+              echo "<settings><mirrors><mirror><id>central</id><url>https://repo1.maven.org/maven2</url><mirrorOf>central</mirrorOf></mirror></mirrors></settings>" > ~/.m2/settings.xml
+              echo "Using default Maven settings"
+            fi
+          fi
+
+      - name: Build with Maven
+        working-directory: ${{ inputs.working-directory }}
+        run: |
+          echo "JAVA VERSION:"
+          java -version
+          echo "MAVEN VERSION:"
+          mvn --version
+          
+          export MAVEN_OPTS='-Xmx2g'
+          echo "Executing: ${{ inputs.build-command }} ${{ inputs.custom-build-arguments }}"
+          ${{ inputs.build-command }} ${{ inputs.custom-build-arguments }}
