@@ -1,0 +1,118 @@
+name: Workflow Orchestrator @ Conveyor
+
+on:
+  workflow_call:
+    inputs:
+      working-directory:
+        description: 'Working directory where the build should run'
+        default: '.'
+        required: false
+        type: string
+      cache-enabled:
+        description: 'Whether to use dependency caching'
+        default: 'true'
+        required: false
+        type: string
+      fetch-depth:
+        description: 'Number of commits to fetch'
+        default: '1'
+        required: false
+        type: string
+      lfs:
+        description: 'Download Git-LFS files'
+        default: 'false'
+        required: false
+        type: string
+      submodules:
+        description: 'Checkout submodules'
+        default: 'false'
+        required: false
+        type: string
+      # Java
+      java-version:
+        description: 'Java version to use'
+        default: '17'
+        required: false
+        type: string
+      java-distribution:
+        description: 'Java distribution to use'
+        default: 'temurin'
+        required: false
+        type: string
+      build-command:
+        description: 'Command to build the project'
+        required: false
+        type: string
+      custom-build-arguments:
+        description: 'Additional build arguments'
+        default: ''
+        required: false
+        type: string
+      artifact-name:
+        description: 'Name of the artifact to upload'
+        required: false
+        type: string
+    secrets:
+      MAVEN_USERNAME:
+        required: false
+      MAVEN_PASSWORD:
+        required: false
+
+jobs:
+  detect-language:
+    runs-on: ubuntu-latest
+    outputs:
+      language: ${{ steps.detect.outputs.language }}
+      has-java: ${{ steps.detect.outputs.has-java }}
+    
+    steps:
+    - name: Checkout code
+      uses: euthiagodealmeida/conveyor-actions/.github/actions/shared/checkout@develop
+      with:
+        fetch-depth: ${{ inputs.fetch-depth }}
+        lfs: ${{ inputs.lfs }}
+        submodules: ${{ inputs.submodules }}
+
+    - name: Detect project language
+      id: detect
+      shell: bash
+      run: |
+        # Check for Java
+        if [ -f "pom.xml" ] || [ -f "build.gradle" ] || [ -f "build.gradle.kts" ] || [ -d "src/main/java" ]; then
+          echo "has-java=true" >> $GITHUB_OUTPUT
+          echo "language=java" >> $GITHUB_OUTPUT
+        else
+          echo "has-java=false" >> $GITHUB_OUTPUT
+        fi
+        
+        # Print detected language
+        language=$(grep "language=" $GITHUB_OUTPUT | cut -d'=' -f2)
+        echo "Detected language: $language"
+
+  run-java-workflow:
+    needs: detect-language
+    if: ${{ needs.detect-language.outputs.has-java == 'true' }}
+    uses: euthiagodealmeida/conveyor-actions/.github/workflows/java-workflow.yml@develop
+    with:
+      java-version: ${{ inputs.java-version }}
+      java-distribution: ${{ inputs.java-distribution }}
+      cache-enabled: ${{ inputs.cache-enabled }}
+      build-command: ${{ inputs.build-command || 'mvn -B clean compile' }}
+      custom-build-arguments: ${{ inputs.custom-build-arguments || '' }}
+      artifact-name: ${{ inputs.artifact-name || 'java-artifact' }}
+      working-directory: ${{ inputs.working-directory }}
+      fetch-depth: ${{ inputs.fetch-depth }}
+      lfs: ${{ inputs.lfs }}
+      submodules: ${{ inputs.submodules }}
+    secrets:
+      MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+      MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
+
+  # Fallback job    
+  no-language-detected:
+    needs: detect-language
+    if: ${{ needs.detect-language.outputs.language == '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: No supported language detected
+        run: echo "::error::No supported programming language detected in this repository"
