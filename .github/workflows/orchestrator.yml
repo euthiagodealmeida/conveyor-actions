@@ -92,7 +92,7 @@ jobs:
   run-java-workflow:
     needs: detect-language
     if: ${{ needs.detect-language.outputs.has-java == 'true' }}
-    uses: euthiagodealmeida/conveyor-actions/.github/workflows/java/java-workflow.yml@develop
+    uses: euthiagodealmeida/conveyor-actions/.github/workflows/java.yml@develop
     with:
       java-version: ${{ inputs.java-version }}
       java-distribution: ${{ inputs.java-distribution }}
