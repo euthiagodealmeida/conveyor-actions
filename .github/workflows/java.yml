@@ -107,46 +107,27 @@ on:
         default: 'artifact.jar'
         required: true
         type: string
-
+    secrets:
+      MAVEN_USERNAME:
+        required: false
+      MAVEN_PASSWORD:
+        required: false
 
 jobs:
   build:
-    name: Build
-    uses: euthiagodealmeida/conveyor-actions/.github/workflows/java/build.yml@develop
-    with:
-      java-version: ${{ inputs.java-version }}
-      java-distribution: ${{ inputs.java-distribution }}
-      build-command: ${{ inputs.build-command }}
-      custom-build-arguments: ${{ inputs.custom-build-arguments }}
-      cache-enabled: ${{ inputs.cache-enabled }}
-      working-directory: ${{ inputs.working-directory }}
-      maven-settings-path: ${{ inputs.maven-settings-path }}
-    secrets:
-      MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
-      MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
-  
-  cache-target:
-    needs: build
     runs-on: ubuntu-latest
-    outputs:
-      cache-key: ${{ steps.cache-key.outputs.key }}
     steps:
-      - name: Checkout Repository
-        uses: euthiagodealmeida/conveyor-actions/.github/actions/shared/checkout@develop
+      - name: Build Java Project
+        uses: euthiagodealmeida/conveyor-actions/.github/actions/java/build@develop
+        id: build
         with:
+          java-version: ${{ inputs.java-version }}
+          java-distribution: ${{ inputs.java-distribution }}
+          build-command: ${{ inputs.build-command }}
+          custom-build-arguments: ${{ inputs.custom-build-arguments }}
+          cache-enabled: ${{ inputs.cache-enabled }}
+          working-directory: ${{ inputs.working-directory }}
+          maven-settings-path: ${{ inputs.maven-settings-path }}
           fetch-depth: ${{ inputs.fetch-depth }}
           lfs: ${{ inputs.lfs }}
           submodules: ${{ inputs.submodules }}
-
-      - name: Generate Cache Key
-        id: cache-key
-        shell: bash
-        run: |
-          echo "key=build-${{ github.sha }}-${{ github.run_id }}" >> $GITHUB_OUTPUT
-          
-      - name: Cache Target Directory
-        uses: euthiagodealmeida/conveyor-actions/.github/actions/shared/cache@develop
-        with:
-          operation: 'save'
-          path: ${{ inputs.working-directory }}/target
-          cache-key: ${{ steps.cache-key.outputs.key }}

@@ -1,5 +1,5 @@
 name: Java @ Build
-description: '[Composite] Build a Java project using GitHub Actions'
+description: '[Composite] Build a Java project'
 
 inputs:
   java-version:
@@ -34,12 +34,20 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    - name: Checkout code
+      uses: euthiagodealmeida/conveyor-actions/.github/actions/shared/checkout@develop
+      id: checkout
+      with:
+        fetch-depth: ${{ inputs.fetch-depth }}
+        lfs: ${{ inputs.lfs }}
+        submodules: ${{ inputs.submodules }}
+
     - name: Set up JDK ${{ inputs.java-version }} (${{ inputs.java-distribution }})
       uses: actions/setup-java@v3
       with:
         distribution: ${{ inputs.java-distribution }}
         java-version: ${{ inputs.java-version }}
-        cache: 'maven'
+        cache: ${{ (inputs.cache-enabled == 'true') && 'maven' || '' }}
 
     - name: Setup Maven Settings
       shell: bash
@@ -65,3 +73,17 @@ runs:
         export MAVEN_OPTS='-Xmx2g'
         echo "Executing: ${{ inputs.build-command }} ${{ inputs.custom-build-arguments }}"
         ${{ inputs.build-command }} ${{ inputs.custom-build-arguments }}
+
+    - name: Generate cache key
+      id: cache-key
+      shell: bash
+      run: |
+        echo "Generating cache key based on pom.xml and current commit"
+        echo "key=build-${{ github.sha }}-${{ github.run_id }}" >> $GITHUB_OUTPUT
+  
+    - name: Cache target directory
+      uses: euthiagodealmeida/conveyor-actions/.github/actions/shared/cache@develop
+      with:
+        operation: 'save'
+        path: ${{ inputs.working-directory }}/target
+        cache-key: ${{ steps.cache-key.outputs.key }}
