@@ -2,6 +2,18 @@ name: Java @ Build
 description: '[Composite] Build a Java project'
 
 inputs:
+  fetch-depth:
+    description: 'Number of commits to fetch'
+    default: '1'
+    required: false
+  lfs:
+    description: 'Download Git-LFS files'
+    default: 'false'
+    required: false
+  submodules:
+    description: 'Checkout submodules'
+    default: 'false'
+    required: false
   java-version:
     description: 'Java version to use'
     required: false

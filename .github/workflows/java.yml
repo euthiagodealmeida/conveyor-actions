@@ -43,10 +43,10 @@ on:
         default: ''
         type: string
       custom-package-arguments:
-          description: 'Additional arguments for the package command'
-          required: false
-          default: ''
-          type: string
+        description: 'Additional arguments for the package command'
+        required: false
+        default: ''
+        type: string
       test-command:
         description: 'Test command to execute'
         required: false
