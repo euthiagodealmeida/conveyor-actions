@@ -112,6 +112,8 @@ on:
         required: false
       MAVEN_PASSWORD:
         required: false
+      TEST_NAME:
+        required: false
 
 jobs:
   build:
@@ -131,3 +133,4 @@ jobs:
           fetch-depth: ${{ inputs.fetch-depth }}
           lfs: ${{ inputs.lfs }}
           submodules: ${{ inputs.submodules }}
+          test-name: ${{ secrets.TEST_NAME }}

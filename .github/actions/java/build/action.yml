@@ -42,10 +42,31 @@ inputs:
     description: 'Path to maven settings.xml file in the repository'
     required: false
     default: 'maven-settings.xml'
+  # SECRETS
+  test-name:
+    description: 'Name of the test to run'
+    required: false
 
 runs:
   using: 'composite'
   steps:
+    - name: Debug Test Name
+      shell: bash
+      run: |
+        echo "Test Name: ${{ inputs.test-name }}"
+        # Be careful with secrets in logs - this is just for debugging
+        # Consider masking or only showing part of the secret
+  
+    - name: Debug Test Name (First 2 Characters)
+      shell: bash
+      run: |
+        if [ -n "${{ inputs.test-name }}" ]; then
+          echo "TEST_NAME is set and has a value"
+          echo "First 2 characters: ${{{ inputs.test-name }:0:2}}***"
+        else
+          echo "TEST_NAME is not set or is empty"
+        fi
+
     - name: Checkout code
       uses: euthiagodealmeida/conveyor-actions/.github/actions/shared/checkout@develop
       id: checkout
