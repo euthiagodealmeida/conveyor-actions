@@ -62,7 +62,8 @@ runs:
       run: |
         if [ -n "${{ inputs.test-name }}" ]; then
           echo "TEST_NAME is set and has a value"
-          echo "First 2 characters: ${{{ inputs.test-name }:0:2}}***"
+          first_two="${{ inputs.test-name }}"
+          echo "First 2 characters: ${first_two:0:2}***"
         else
           echo "TEST_NAME is not set or is empty"
         fi
