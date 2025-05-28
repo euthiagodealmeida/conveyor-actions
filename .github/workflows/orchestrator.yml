@@ -52,6 +52,10 @@ on:
         description: 'Name of the artifact to upload'
         required: false
         type: string
+      artifact-path:
+        description: 'Path to the artifact to upload'
+        required: false
+        type: string
     secrets:
       MAVEN_USERNAME:
         required: false
@@ -94,12 +98,13 @@ jobs:
     if: ${{ needs.detect-language.outputs.has-java == 'true' }}
     uses: euthiagodealmeida/conveyor-actions/.github/workflows/java.yml@develop
     with:
-      java-version: ${{ inputs.java-version }}
-      java-distribution: ${{ inputs.java-distribution }}
-      cache-enabled: ${{ inputs.cache-enabled }}
+      java-version: ${{ inputs.java-version || '17' }}
+      java-distribution: ${{ inputs.java-distribution || 'temurin' }}
+      cache-enabled: ${{ inputs.cache-enabled || 'true' }}
       build-command: ${{ inputs.build-command || 'mvn -B clean compile' }}
       custom-build-arguments: ${{ inputs.custom-build-arguments || '' }}
       artifact-name: ${{ inputs.artifact-name || 'java-artifact' }}
+      artifact-path: ${{ inputs.artifact-path || 'target/*.jar' }}
       working-directory: ${{ inputs.working-directory }}
       fetch-depth: ${{ inputs.fetch-depth }}
       lfs: ${{ inputs.lfs }}
